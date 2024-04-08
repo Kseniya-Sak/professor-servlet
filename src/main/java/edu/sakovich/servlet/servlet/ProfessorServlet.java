@@ -3,15 +3,9 @@ package edu.sakovich.servlet.servlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.sakovich.servlet.db.ConnectionManager;
 import edu.sakovich.servlet.db.ConnectionManagerImpl;
-import edu.sakovich.servlet.repository.DepartmentRepository;
 import edu.sakovich.servlet.repository.ProfessorRepository;
-import edu.sakovich.servlet.repository.SubjectRepository;
-import edu.sakovich.servlet.repository.impl.DepartmentRepositoryImpl;
 import edu.sakovich.servlet.repository.impl.ProfessorRepositoryImpl;
-import edu.sakovich.servlet.repository.impl.SubjectRepositoryImpl;
-import edu.sakovich.servlet.repository.mapper.impl.DepartmentResultSetMapperImpl;
 import edu.sakovich.servlet.repository.mapper.impl.ProfessorResultSetMapperImpl;
-import edu.sakovich.servlet.repository.mapper.impl.SubjectResultSetMapperImpl;
 import edu.sakovich.servlet.service.ProfessorService;
 import edu.sakovich.servlet.service.impl.ProfessorServiceImpl;
 import edu.sakovich.servlet.servlet.dto.ProfessorWithSubjectsIncomingDto;
@@ -39,11 +33,8 @@ public class ProfessorServlet extends HttpServlet {
 
     public ProfessorServlet() {
         ConnectionManager connectionManager = new ConnectionManagerImpl();
-        SubjectRepository subjectRepository = new SubjectRepositoryImpl(connectionManager, new SubjectResultSetMapperImpl());
-        DepartmentRepository departmentRepository = new DepartmentRepositoryImpl(connectionManager,
-                new DepartmentResultSetMapperImpl());
         ProfessorRepository professorRepository = new ProfessorRepositoryImpl(connectionManager,
-                new ProfessorResultSetMapperImpl(), departmentRepository, subjectRepository);
+                new ProfessorResultSetMapperImpl());
         professorService = new ProfessorServiceImpl(professorRepository, new ProfessorDtoMapperImpl());
         objectMapper = new ObjectMapper();
     }
@@ -72,6 +63,8 @@ public class ProfessorServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -80,17 +73,21 @@ public class ProfessorServlet extends HttpServlet {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
 
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        ProfessorWithSubjectsIncomingDto professorRequest = objectMapper.readValue(requestBody, ProfessorWithSubjectsIncomingDto.class);
         String response = "";
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            ProfessorWithSubjectsIncomingDto professorRequest = objectMapper.readValue(requestBody,
+                    ProfessorWithSubjectsIncomingDto.class);
             response = objectMapper.writeValueAsString(professorService.save(professorRequest));
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
         }
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -104,6 +101,7 @@ public class ProfessorServlet extends HttpServlet {
             String pathInfo = req.getPathInfo();
             int id = Integer.parseInt(pathInfo.substring(1));
             professorService.deleteById(id);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
@@ -111,6 +109,8 @@ public class ProfessorServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -119,18 +119,22 @@ public class ProfessorServlet extends HttpServlet {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
 
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        ProfessorWithSubjectsIncomingDto professorRequest = objectMapper.readValue(requestBody, ProfessorWithSubjectsIncomingDto.class);
         String response = "";
 
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            ProfessorWithSubjectsIncomingDto professorRequest = objectMapper.readValue(requestBody,
+                    ProfessorWithSubjectsIncomingDto.class);
             professorService.update(professorRequest);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
         }
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }

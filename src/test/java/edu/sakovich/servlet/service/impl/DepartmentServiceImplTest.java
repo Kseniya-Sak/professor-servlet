@@ -10,11 +10,12 @@ import edu.sakovich.servlet.servlet.dto.DepartmentOutGoingDto;
 import edu.sakovich.servlet.servlet.dto.FindByIdDepartmentOutGoingDto;
 import edu.sakovich.servlet.servlet.mapper.DepartmentDtoMapper;
 import edu.sakovich.servlet.servlet.mapper.DepartmentDtoMapperImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +38,8 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    void testSave() {
+    void testSave() throws FileNotFoundException {
+        PrintWriter printWriter = new PrintWriter("test");
         Department wantToSaveDepartment = new Department("testName");
         Department savedDepartment = new Department(1, "testName");
         Mockito.doReturn(savedDepartment).when(mockitoDepartmentRepository).save(wantToSaveDepartment);

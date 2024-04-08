@@ -34,7 +34,8 @@ public class DepartmentServlet extends HttpServlet {
 
     public DepartmentServlet() {
         ConnectionManager connectionManager = new ConnectionManagerImpl();
-        DepartmentRepository departmentRepository = new DepartmentRepositoryImpl(connectionManager, new DepartmentResultSetMapperImpl());
+        DepartmentRepository departmentRepository = new DepartmentRepositoryImpl(connectionManager,
+                new DepartmentResultSetMapperImpl());
         departmentService = new DepartmentServiceImpl(departmentRepository, new DepartmentDtoMapperImpl());
         objectMapper = new ObjectMapper();
     }
@@ -63,6 +64,8 @@ public class DepartmentServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -70,31 +73,35 @@ public class DepartmentServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
-
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        DepartmentIncomingDto departmentRequest = objectMapper.readValue(requestBody, DepartmentIncomingDto.class);
         String response = "";
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            DepartmentIncomingDto departmentRequest = objectMapper.readValue(requestBody, DepartmentIncomingDto.class);
             response = objectMapper.writeValueAsString(departmentService.save(departmentRequest));
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
         }
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
+        resp.setContentType(RESPONSE_TYPE);
 
         String response = "";
+
         try {
             String pathInfo = req.getPathInfo();
             int id = Integer.parseInt(pathInfo.substring(1));
             departmentService.deleteById(id);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
@@ -102,6 +109,8 @@ public class DepartmentServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -109,13 +118,14 @@ public class DepartmentServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
-
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        DepartmentIncomingDto departmentRequest = objectMapper.readValue(requestBody, DepartmentIncomingDto.class);
         String response = "";
 
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            DepartmentIncomingDto departmentRequest = objectMapper.readValue(requestBody, DepartmentIncomingDto.class);
+
             departmentService.update(departmentRequest);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
@@ -123,6 +133,8 @@ public class DepartmentServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }

@@ -62,6 +62,8 @@ public class SubjectServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -70,17 +72,20 @@ public class SubjectServlet extends HttpServlet {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
 
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        SubjectIncomingDto subjectRequest = objectMapper.readValue(requestBody, SubjectIncomingDto.class);
         String response = "";
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            SubjectIncomingDto subjectRequest = objectMapper.readValue(requestBody, SubjectIncomingDto.class);
             response = objectMapper.writeValueAsString(subjectService.save(subjectRequest));
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
         }
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -94,6 +99,7 @@ public class SubjectServlet extends HttpServlet {
             String pathInfo = req.getPathInfo();
             int id = Integer.parseInt(pathInfo.substring(1));
             subjectService.deleteById(id);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
@@ -101,6 +107,8 @@ public class SubjectServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -109,12 +117,13 @@ public class SubjectServlet extends HttpServlet {
         resp.setContentType(RESPONSE_TYPE);
         resp.setCharacterEncoding(CHARACTER_ENCODING);
 
-        String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        SubjectIncomingDto subjectRequest = objectMapper.readValue(requestBody, SubjectIncomingDto.class);
         String response = "";
 
         try {
+            String requestBody = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            SubjectIncomingDto subjectRequest = objectMapper.readValue(requestBody, SubjectIncomingDto.class);
             subjectService.update(subjectRequest);
+            resp.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response = e.getMessage();
@@ -122,6 +131,8 @@ public class SubjectServlet extends HttpServlet {
 
         try (PrintWriter printWriter = resp.getWriter()) {
             printWriter.write(response);
+        } catch (IOException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }

@@ -5,10 +5,10 @@ import edu.sakovich.servlet.exception.RepositoryException;
 import edu.sakovich.servlet.model.Department;
 import edu.sakovich.servlet.model.Professor;
 import edu.sakovich.servlet.model.Subject;
-import edu.sakovich.servlet.repository.DepartmentRepository;
 import edu.sakovich.servlet.repository.ProfessorRepository;
-import edu.sakovich.servlet.repository.SubjectRepository;
+import edu.sakovich.servlet.repository.mapper.DepartmentResultSetMapper;
 import edu.sakovich.servlet.repository.mapper.ProfessorResultSetMapper;
+import edu.sakovich.servlet.repository.mapper.impl.DepartmentResultSetMapperImpl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,22 +19,17 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static edu.sakovich.servlet.repository.ParameterHandler.departmentNotExist;
 import static edu.sakovich.servlet.repository.ParameterHandler.professorNotExist;
-import static edu.sakovich.servlet.repository.ParameterHandler.subjectNotExist;
 import static edu.sakovich.servlet.repository.ParameterHandler.throwExceptionIfParameterNull;
 
 public class ProfessorRepositoryImpl implements ProfessorRepository {
     private final ConnectionManager connectionManager;
     private final ProfessorResultSetMapper mapper;
-    private final DepartmentRepository departmentRepository;
-    private final SubjectRepository subjectRepository;
+    private final DepartmentResultSetMapper departmentMapper = new DepartmentResultSetMapperImpl();
 
-    public ProfessorRepositoryImpl(ConnectionManager connectionManager, ProfessorResultSetMapper mapper, DepartmentRepository departmentRepository, SubjectRepository subjectRepository) {
+    public ProfessorRepositoryImpl(ConnectionManager connectionManager, ProfessorResultSetMapper mapper) {
         this.connectionManager = connectionManager;
         this.mapper = mapper;
-        this.departmentRepository = departmentRepository;
-        this.subjectRepository = subjectRepository;
     }
 
     @Override
@@ -47,14 +42,6 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
                     """.formatted(professor.getName(), professor.getSurname()));
         }
 
-        throwExceptionIfParameterNull(departmentRepository.findById(professor.getDepartment().getId()).isEmpty(),
-                departmentNotExist(professor.getDepartment().getId()));
-
-        for (Subject subject : professor.getSubjects()) {
-            throwExceptionIfParameterNull(subjectRepository.findById(subject.getId()).isEmpty(),
-                    subjectNotExist(subject.getId()));
-        }
-
 
         String saveProfessor = "insert into professor(p_name, surname, department_id) values (?, ?, ?);";
         String saveProfessorSubjects = "insert into professor_subject(professor_id, subject_id) values (?, ?);";
@@ -63,12 +50,11 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
                      .prepareStatement(saveProfessor, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement preparedStatement2 = connection
                      .prepareStatement(saveProfessorSubjects)) {
+
             preparedStatement1.setString(1, professor.getName());
             preparedStatement1.setString(2, professor.getSurname());
             preparedStatement1.setInt(3, professor.getDepartment().getId());
-
             preparedStatement1.executeUpdate();
-
             ResultSet generatedKeys = preparedStatement1.getGeneratedKeys();
             generatedKeys.next();
             int id = generatedKeys.getInt("p_id");
@@ -94,14 +80,18 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
     @Override
     public Set<Professor> findAll() {
         Set<Professor> professors = new LinkedHashSet<>();
-        String findAllSql = "select * from professor order by p_id;";
+        String findAllSql = """
+                select p_id, p_name, surname, d_id, d_name from professor
+                    join department d on d.d_id = professor.department_id
+                order by p_id;
+                """;
         try (Connection connection = connectionManager.getConnection();
         Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(findAllSql);
 
             while (resultSet.next()) {
-                Optional<Department> optionalDepartment = departmentRepository.findById(resultSet.getInt("department_id"));
-                professors.add(mapper.map(resultSet, optionalDepartment.orElse(new Department())));
+                Department department = departmentMapper.map(resultSet);
+                professors.add(mapper.map(resultSet, department));
             }
             return professors;
         } catch (SQLException e) {
@@ -112,7 +102,6 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
     @Override
     public Optional<Professor> findById(Integer id) {
         throwExceptionIfParameterNull(id, "The ID must not be null");
-
         String findById = """
                 Select p_id, p_name, surname, d_id, d_name, s_id, s_name, value_of_hours from professor
                     inner join department d on d.d_id = professor.department_id
@@ -132,17 +121,8 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
     @Override
     public boolean update(Professor professor) {
         checkAllParameters(professor);
-
         throwExceptionIfParameterNull(findById(professor.getId()).isEmpty(),
                 professorNotExist(professor.getId()));
-
-        throwExceptionIfParameterNull(departmentRepository.findById(professor.getDepartment().getId()).isEmpty(),
-                professorNotExist(professor.getDepartment().getId()));
-
-        for (Subject subject : professor.getSubjects()) {
-            throwExceptionIfParameterNull(subjectRepository.findById(subject.getId()).isEmpty(),
-                    subjectNotExist(subject.getId()));
-        }
 
         deleteFromProfessorSubjectById(professor.getId());
 

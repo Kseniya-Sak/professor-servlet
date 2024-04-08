@@ -9,7 +9,6 @@ import edu.sakovich.servlet.service.ProfessorService;
 import edu.sakovich.servlet.servlet.dto.DepartmentIncomingDto;
 import edu.sakovich.servlet.servlet.dto.ProfessorWithSubjectsIncomingDto;
 import edu.sakovich.servlet.servlet.dto.ProfessorWithSubjectsOutGoingDto;
-import edu.sakovich.servlet.servlet.dto.ProfessorIncomingDto;
 import edu.sakovich.servlet.servlet.dto.ProfessorOutGoingDto;
 import edu.sakovich.servlet.servlet.dto.SubjectIncomingDto;
 import edu.sakovich.servlet.servlet.mapper.DepartmentDtoMapper;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 

@@ -16,6 +16,13 @@ public class Department {
         this.name = name;
     }
 
+
+    public Department(int id, String name, Set<Professor> professors) {
+        this.id = id;
+        this.name = name;
+        this.professors = professors;
+    }
+
     public Department() {
     }
 
@@ -72,7 +79,6 @@ public class Department {
         return "Department{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", professors=" + professors +
                 '}';
     }
 }

@@ -1,6 +1,6 @@
 package edu.sakovich.servlet.repository.impl;
 
-import edu.sakovich.servlet.ParentTest;
+import edu.sakovich.servlet.repository.ParentTest;
 import edu.sakovich.servlet.db.ConnectionManagerTest;
 import edu.sakovich.servlet.exception.RepositoryException;
 import edu.sakovich.servlet.model.Department;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.ext.ScriptUtils;
 import org.testcontainers.jdbc.JdbcDatabaseDelegate;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,6 +66,23 @@ class DepartmentRepositoryImplTest extends ParentTest {
                         () -> departmentRepository.save(null),
                         "The department must not be null")
         );
+    }
+
+    @Test
+    void testSaveNameAlreadyExist() {
+        Department department = new Department("test");
+        departmentRepository.save(department);
+
+        assertThrows(RepositoryException.class, () -> departmentRepository.save(department));
+    }
+
+    @Test
+    void testUpdateNotNullParameter() {
+        Department department = new Department("Test1");
+        Department savedDepartment = departmentRepository.save(department);
+
+                    savedDepartment.setName("Test2");
+        assertTrue(departmentRepository.update(savedDepartment));
     }
 
     @Test

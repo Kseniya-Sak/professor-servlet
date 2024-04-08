@@ -9,6 +9,12 @@ public class Professor {
     private Department department;
     private Set<Subject> subjects;
 
+    public Professor(int id, String name, String surname) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+    }
+
     public Professor(String name, String surname, Department department) {
         this.name = name;
         this.surname = surname;
@@ -20,6 +26,13 @@ public class Professor {
         this.name = name;
         this.surname = surname;
         this.department = department;
+    }
+
+    public Professor(String name, String surname, Department department, Set<Subject> subjects) {
+        this.name = name;
+        this.surname = surname;
+        this.department = department;
+        this.subjects = subjects;
     }
 
     public Professor(int id, String name, String surname, Department department, Set<Subject> subjects) {
@@ -93,4 +106,13 @@ public class Professor {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "Professor{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", department=" + department +
+                '}';
+    }
 }

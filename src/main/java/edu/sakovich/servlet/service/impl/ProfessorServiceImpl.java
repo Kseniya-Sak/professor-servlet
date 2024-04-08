@@ -25,6 +25,7 @@ public class ProfessorServiceImpl implements ProfessorService {
     @Override
     public ProfessorWithSubjectsOutGoingDto save(ProfessorWithSubjectsIncomingDto professorIncomingDto) {
         Professor incomingProfessor = mapper.mapProfessorWithSubjectsOutGoingDto(professorIncomingDto);
+
         Professor savedProfessor = repository.save(incomingProfessor);
         return mapper.mapProfessorWithSubjectsOutGoingDto(savedProfessor);
     }

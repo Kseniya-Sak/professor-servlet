@@ -29,23 +29,22 @@ public class ParameterHandler {
     public static String departmentNotExist(int departmentId) {
        return  """
             Department with ID = %d doesn't exist.
-            Add such a department in the database"
+            Add such a department in the database
             """.formatted(departmentId);
     }
 
     public static String subjectNotExist(int subjectId) {
         return  """
             Subject with ID = %d doesn't exist.
-            Add such a subject in the database"
+            Add such a subject in the database
             """.formatted(subjectId);
     }
 
     public static String professorNotExist(int professorId) {
         return  """
             Professor with ID = %d doesn't exist.
-            Add such a professor in the database"
+            Add such a professor in the database
             """.formatted(professorId);
     }
-
 
 }

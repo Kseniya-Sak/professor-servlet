@@ -1,6 +1,6 @@
 package edu.sakovich.servlet.db;
 
-import edu.sakovich.servlet.exception.DataBaseConnectionException;
+import edu.sakovich.servlet.exception.RepositoryException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +23,7 @@ public class ConnectionManagerTest implements ConnectionManager {
         try {
             return DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
-            throw new DataBaseConnectionException(
+            throw new RepositoryException(
                     "Problem with connection. Check URL, USERNAME, PASSWORD");
         }
     }

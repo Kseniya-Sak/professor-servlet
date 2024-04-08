@@ -16,10 +16,18 @@ public class Subject {
         this.valueOfHours = valueOfHours;
     }
 
+
     public Subject(int id, String name, int valueOfHours) {
         this.id = id;
         this.name = name;
         this.valueOfHours = valueOfHours;
+    }
+
+    public Subject(int id, String name, int valueOfHours, Set<Professor> professors) {
+        this.id = id;
+        this.name = name;
+        this.valueOfHours = valueOfHours;
+        this.professors = professors;
     }
 
     public int getId() {
