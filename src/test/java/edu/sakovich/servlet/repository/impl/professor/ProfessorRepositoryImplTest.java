@@ -49,23 +49,15 @@ class ProfessorRepositoryImplTest  {
                     .withDatabaseName("my_db")
                     .withUsername("postgres")
                     .withPassword("12345");
-//                    .withExposedPorts(5432);
 
     @BeforeAll
     static void beforeAll() throws SQLException {
         postgres.start();
-//        dataSource = new HikariDataSource();
         System.out.println(dataSource.isClosed());
         dataSource.setDriverClassName(postgres.getDriverClassName());
         dataSource.setJdbcUrl(postgres.getJdbcUrl());
         dataSource.setUsername(postgres.getUsername());
         dataSource.setPassword(postgres.getPassword());
-//        dataSource.setMinimumIdle(5);
-//        dataSource.setMaximumPoolSize(100);
-//        dataSource.setConnectionTimeout(5);
-////        dataSource.setMaxLifetime(1);
-//        dataSource.setAutoCommit(true);
-//        dataSource.setLoginTimeout(10);
 
         jdbcDatabaseDelegate = new JdbcDatabaseDelegate(postgres, "");
     }
