@@ -1,37 +1,30 @@
 package edu.sakovich.servlet.db;
 
+import com.zaxxer.hikari.HikariDataSource;
 import edu.sakovich.servlet.exception.RepositoryException;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static edu.sakovich.servlet.db.DataBaseProperties.getProperties;
-
 public class ConnectionManagerImpl implements ConnectionManager {
-    private static  final String DRIVER = "db.driver";
-    private static final String URL = "db.url";
-    private static final String USERNAME = "db.username";
-    private static final String PASSWORD = "db.password";
 
-    public ConnectionManagerImpl() {
+    private final HikariDataSource dataSource;
+
+    private ConnectionManagerImpl(HikariDataSource dataSource) {
+        this.dataSource=dataSource;
     }
 
-    public Connection getConnection()  {
-        try {
-                Class.forName(getProperties(DRIVER));
-            } catch (ClassNotFoundException e) {
-                throw new RepositoryException("Database driver didn't load.");
-            }
-        try {
-                return DriverManager.getConnection(getProperties(URL),
-                        getProperties(USERNAME), getProperties(PASSWORD)
-                );
-            } catch (SQLException e) {
-                throw new RepositoryException(
-                        "Problem with connection. Check URL, USERNAME, PASSWORD");
-            }
+    public static ConnectionManagerImpl getInstance(HikariDataSource dataSource) {
+       return new ConnectionManagerImpl(dataSource);
     }
 
-
+    @Override
+    public Connection getConnection() {
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RepositoryException(e);
+        }
+    }
 }

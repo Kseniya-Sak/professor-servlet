@@ -1,41 +1,66 @@
-package edu.sakovich.servlet.repository.impl;
+package edu.sakovich.servlet.repository.impl.department;
 
-import edu.sakovich.servlet.repository.ParentTest;
-import edu.sakovich.servlet.db.ConnectionManagerTest;
+import com.zaxxer.hikari.HikariDataSource;
+import edu.sakovich.servlet.db.ConnectionManagerImpl;
 import edu.sakovich.servlet.exception.RepositoryException;
 import edu.sakovich.servlet.model.Department;
 import edu.sakovich.servlet.repository.DepartmentRepository;
+import edu.sakovich.servlet.repository.impl.DepartmentRepositoryImpl;
 import edu.sakovich.servlet.repository.mapper.impl.DepartmentResultSetMapperImpl;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.ext.ScriptUtils;
 import org.testcontainers.jdbc.JdbcDatabaseDelegate;
+import org.testcontainers.junit.jupiter.Container;
 
+import java.sql.SQLException;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DepartmentRepositoryImplTest extends ParentTest {
+class DepartmentRepositoryImplTest {
+    private static HikariDataSource dataSource = new HikariDataSource();
     private static DepartmentRepository departmentRepository;
     private static JdbcDatabaseDelegate jdbcDatabaseDelegate;
+    private static ConnectionManagerImpl connectionManager;
+
+    @Container
+    public static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:15-alpine")
+                    .withDatabaseName("my_db")
+                    .withUsername("postgres")
+                    .withPassword("12345");
+//                    .withExposedPorts(5432);
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws SQLException {
         postgres.start();
-        ConnectionManagerTest connectionManager = new ConnectionManagerTest(
-                postgres.getJdbcUrl(),
-                postgres.getUsername(),
-                postgres.getPassword()
-        );
-        departmentRepository = new DepartmentRepositoryImpl(connectionManager, new DepartmentResultSetMapperImpl());
+        System.out.println(dataSource.isClosed());
+        dataSource.setDriverClassName(postgres.getDriverClassName());
+        dataSource.setJdbcUrl(postgres.getJdbcUrl());
+        dataSource.setUsername(postgres.getUsername());
+        dataSource.setPassword(postgres.getPassword());
+//        dataSource.setMinimumIdle(100);
+//        dataSource.setMaximumPoolSize(1000);
+//        dataSource.setConnectionTimeout(5);
+////        dataSource.setMaxLifetime(1);
+//        dataSource.setAutoCommit(true);
+//        dataSource.setLoginTimeout(10);
+
         jdbcDatabaseDelegate = new JdbcDatabaseDelegate(postgres, "");
     }
+
+
 
     @BeforeEach
     void setUp() {
         ScriptUtils.runInitScript(jdbcDatabaseDelegate, "sql/createTables.sql");
+        connectionManager = ConnectionManagerImpl.getInstance(dataSource);
+        departmentRepository = new DepartmentRepositoryImpl(connectionManager, new DepartmentResultSetMapperImpl());
     }
 
     @Test
@@ -142,7 +167,7 @@ class DepartmentRepositoryImplTest extends ParentTest {
                 () -> departmentRepository.deleteById(null));
     }
 
-    @BeforeEach
+    @AfterEach
     void reset() {
         ScriptUtils.runInitScript(jdbcDatabaseDelegate, "sql/dropTables.sql");
     }
@@ -150,6 +175,7 @@ class DepartmentRepositoryImplTest extends ParentTest {
 
     @AfterAll
     static void afterAll() {
+        connectionManager = null;
         postgres.stop();
     }
 }

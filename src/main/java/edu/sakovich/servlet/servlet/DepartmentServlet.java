@@ -3,6 +3,7 @@ package edu.sakovich.servlet.servlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.sakovich.servlet.db.ConnectionManager;
 import edu.sakovich.servlet.db.ConnectionManagerImpl;
+import edu.sakovich.servlet.db.DataBaseProperties;
 import edu.sakovich.servlet.repository.DepartmentRepository;
 import edu.sakovich.servlet.repository.impl.DepartmentRepositoryImpl;
 import edu.sakovich.servlet.repository.mapper.impl.DepartmentResultSetMapperImpl;
@@ -33,7 +34,7 @@ public class DepartmentServlet extends HttpServlet {
     private final ObjectMapper objectMapper;
 
     public DepartmentServlet() {
-        ConnectionManager connectionManager = new ConnectionManagerImpl();
+        ConnectionManager connectionManager = ConnectionManagerImpl.getInstance(DataBaseProperties.dataSource);
         DepartmentRepository departmentRepository = new DepartmentRepositoryImpl(connectionManager,
                 new DepartmentResultSetMapperImpl());
         departmentService = new DepartmentServiceImpl(departmentRepository, new DepartmentDtoMapperImpl());
